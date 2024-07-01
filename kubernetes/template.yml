@@ -1,0 +1,342 @@
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flight
+  labels:
+    app: flight
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flight
+  template:
+    metadata:
+      labels:
+        app: flight
+    spec:
+      containers:
+        - name: flight
+          image: username/flight:latest
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 120
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 5
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flightreservation
+  labels:
+    app: flightreservation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flightreservation
+  template:
+    metadata:
+      labels:
+        app: flightreservation
+    spec:
+      containers:
+        - name: flightreservation
+          image: username/flightreservation:latest
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 120
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 5
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment
+  labels:
+    app: payment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment
+  template:
+    metadata:
+      labels:
+        app: payment
+    spec:
+      containers:
+        - name: payment
+          image: username/payment:latest
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 120
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 5
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lodging
+  labels:
+    app: lodging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lodging
+  template:
+    metadata:
+      labels:
+        app: lodging
+    spec:
+      containers:
+        - name: lodging
+          image: username/lodging:latest
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 120
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 5
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lodgingreservation
+  labels:
+    app: lodgingreservation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lodgingreservation
+  template:
+    metadata:
+      labels:
+        app: lodgingreservation
+    spec:
+      containers:
+        - name: lodgingreservation
+          image: username/lodgingreservation:latest
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 120
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 5
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mypage
+  labels:
+    app: mypage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mypage
+  template:
+    metadata:
+      labels:
+        app: mypage
+    spec:
+      containers:
+        - name: mypage
+          image: username/mypage:latest
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 120
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 5
+
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: flight
+  labels:
+    app: flight
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: flight
+
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: flightreservation
+  labels:
+    app: flightreservation
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: flightreservation
+
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment
+  labels:
+    app: payment
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: payment
+
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: lodging
+  labels:
+    app: lodging
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: lodging
+
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: lodgingreservation
+  labels:
+    app: lodgingreservation
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: lodgingreservation
+
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mypage
+  labels:
+    app: mypage
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: mypage
+
