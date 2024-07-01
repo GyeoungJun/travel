@@ -120,32 +120,6 @@ public class Flight {
 
     //>>> Clean Arch / Port Method
     //<<< Clean Arch / Port Method
-    public static void increaseFlightSeats(
-        FlightReservationFailed flightReservationFailed
-    ) {
-        //implement business logic here:
-
-        /** Example 1:  new item 
-        Flight flight = new Flight();
-        repository().save(flight);
-
-        */
-
-        /** Example 2:  finding and process
-        
-        repository().findById(flightReservationFailed.get???()).ifPresent(flight->{
-            
-            flight // do something
-            repository().save(flight);
-
-
-         });
-        */
-
-    }
-
-    //>>> Clean Arch / Port Method
-    //<<< Clean Arch / Port Method
     public static void decreaseFlightSeats(
         FlightReservationCompleted flightReservationCompleted
     ) {
