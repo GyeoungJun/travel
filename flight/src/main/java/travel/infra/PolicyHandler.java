@@ -79,24 +79,6 @@ public class PolicyHandler {
 
     @StreamListener(
         value = KafkaProcessor.INPUT,
-        condition = "headers['type']=='FlightReservationFailed'"
-    )
-    public void wheneverFlightReservationFailed_IncreaseFlightSeats(
-        @Payload FlightReservationFailed flightReservationFailed
-    ) {
-        FlightReservationFailed event = flightReservationFailed;
-        System.out.println(
-            "\n\n##### listener IncreaseFlightSeats : " +
-            flightReservationFailed +
-            "\n\n"
-        );
-
-        // Sample Logic //
-        Flight.increaseFlightSeats(event);
-    }
-
-    @StreamListener(
-        value = KafkaProcessor.INPUT,
         condition = "headers['type']=='FlightReservationCompleted'"
     )
     public void wheneverFlightReservationCompleted_DecreaseFlightSeats(
