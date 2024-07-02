@@ -42,6 +42,7 @@ spring:
 
 logging:
   level:
+    root: ${FLIGHT_LOG_LEVEL}
     org.hibernate.type: trace
     org.springframework.cloud: debug
 

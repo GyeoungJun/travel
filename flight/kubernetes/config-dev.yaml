@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-dev
+  namespace: default
+data:
+  FLIGHT_NAME: kimgyeongjun
+  FLIGHT_LOG_LEVEL: INFO
