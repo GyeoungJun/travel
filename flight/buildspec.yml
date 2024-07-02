@@ -77,6 +77,20 @@ phases:
                     image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$_EKS_REPO_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION
                     ports:
                       - containerPort: 8080
+                    env:
+                    - name: FLIGHT_NAME
+                      valueFrom:
+                        configMapKeyRef:
+                          name: config-dev
+                          key: FLIGHT_NAME
+                    - name: FLIGHT_LOG_LEVEL
+                      valueFrom:
+                        configMapKeyRef:
+                          name: config-dev
+                          key: FLIGHT_LOG_LEVEL
+                    resources:
+                      requests:
+                        cpu: "200m" 
                     readinessProbe:
                       httpGet:
                         path: /actuator/health
@@ -93,6 +107,13 @@ phases:
                       timeoutSeconds: 2
                       periodSeconds: 5
                       failureThreshold: 5
+                    volumeMounts:
+                    - mountPath: "/mnt/data"
+                      name: volume
+                volumes:
+                - name: volume
+                  persistentVolumeClaim:
+                    claimName: flight-pvc 
           EOF
 
 cache:
