@@ -30,8 +30,6 @@ spec:
               configMapKeyRef:
                 name: config-dev
                 key: FLIGHT_LOG_LEVEL
-          volumeMounts:
-            - name: k8s-my
           resources:
             requests:
               cpu: "200m" 
@@ -51,3 +49,10 @@ spec:
             timeoutSeconds: 2
             periodSeconds: 5
             failureThreshold: 5
+          volumeMounts:
+          - mountPath: "/mnt/data"
+            name: volume
+      volumes:
+      - name: volume
+        persistentVolumeClaim:
+          claimName: flight-pvc  
