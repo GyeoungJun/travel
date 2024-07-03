@@ -313,4 +313,259 @@ spring:
     - Pod 재배포 이후 txt 파일 새로 생성 / 기존 생성된 txt 파일 확인
       ![image](https://github.com/GyeoungJun/travel/assets/110224872/985cd973-46aa-4e23-844d-170090ecc7bf)
 
+### 셀프 힐링/무정지배포 - Liveness/Readiness Probe
+
+- 셀프힐링(LivenessProbe)
+  - deployment.yaml
+    ```java
+    apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: flight
+        labels:
+          app: flight
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: flight
+        template:
+          metadata:
+            labels:
+              app: flight
+          spec:
+            containers:
+              - name: flight
+                image: "kimgyeongjun/flight:0702"
+                ports:
+                  - containerPort: 8080
+                resources:
+                  requests:
+                    cpu: "200m" 
+                readinessProbe:
+                  httpGet:
+                    path: '/actuator/health'
+                    port: 8080
+                  initialDelaySeconds: 10
+                  timeoutSeconds: 2
+                  periodSeconds: 5
+                  failureThreshold: 10
+                livenessProbe:
+                  httpGet:
+                    path: '/actuator/health'
+                    port: 8080
+                  initialDelaySeconds: 120
+                  timeoutSeconds: 2
+                  periodSeconds: 5
+                  failureThreshold: 5
+                volumeMounts:
+                - mountPath: "/mnt/data"
+                  name: volume
+            volumes:
+            - name: volume
+              persistentVolumeClaim:
+                claimName: flight-pvc  
+    ```
+  - 로컬에서 프로젝트 RUN시 LivenessProbe 확인
+    ![image](https://github.com/GyeoungJun/travel/assets/110224872/30e8f2db-384c-47f2-8dca-72c49a21c515)
+  - Flight 서비스에 라우터 생성(LoadBalancer 타입으로 변경)
+    ```java
+    kubectl expose deploy flight --type=LoadBalancer --port=8080
+    kubectl get svc
+    ```
+    ![image](https://github.com/GyeoungJun/travel/assets/110224872/9ac8cb9d-d0cd-41ba-be8e-6803aac2de15)
+  - External-IP 호출하여 LivenessProbe 확인
+    ```java
+    http a5c7cd28e3198433c808a86ca0ea9e0c-942751862.ap-northeast-    2.elb.amazonaws.com:8080/actuator/health
+    ```
+    ![image](https://github.com/GyeoungJun/travel/assets/110224872/30a4ba60-9131-4256-a03d-e78d5a8138a1)
+
+- 무정지배포(Readiness Probe)
+  - deployment.yaml
+    ```java
+    apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: flight
+        labels:
+          app: flight
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: flight
+        template:
+          metadata:
+            labels:
+              app: flight
+          spec:
+            containers:
+              - name: flight
+                image: "kimgyeongjun/flight:0702"
+                ports:
+                  - containerPort: 8080
+                resources:
+                  requests:
+                    cpu: "200m" 
+                readinessProbe:
+                  httpGet:
+                    path: '/actuator/health'
+                    port: 8080
+                  initialDelaySeconds: 10
+                  timeoutSeconds: 2
+                  periodSeconds: 5
+                  failureThreshold: 10
+                livenessProbe:
+                  httpGet:
+                    path: '/actuator/health'
+                    port: 8080
+                  initialDelaySeconds: 120
+                  timeoutSeconds: 2
+                  periodSeconds: 5
+                  failureThreshold: 5
+                volumeMounts:
+                - mountPath: "/mnt/data"
+                  name: volume
+            volumes:
+            - name: volume
+              persistentVolumeClaim:
+                claimName: flight-pvc  
+    ```
+  - 부하테스트를 위한 Pod 설치
+    ```java
+    kubectl apply -f - <<EOF
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: siege
+    spec:
+      containers:
+      - name: siege
+        image: apexacme/siege-nginx
+    EOF
+    ```
+  - ReadinessProbe가 없는 상태에서의 배포 테스트
+    ![image](https://github.com/GyeoungJun/travel/assets/110224872/4f41b764-939b-47a7-aa9f-efbd8f57f9f5)
+  - ReadinessProbe를 설정 한 상태에서의 배포 테스트
+    ![image](https://github.com/GyeoungJun/travel/assets/110224872/f4eb360c-8be5-4c6f-a35e-b61048511a3d)
+
+### 서비스 메쉬 응용 - Mesh
+- Istio Service Mesh를 클러스터에 설치
+    
+    ```java
+    export ISTIO_VERSION=1.18.7
+    curl -L https://istio.io/downloadIstio | ISTIO_VERSION=$ISTIO_VERSION TARGET_ARCH=x86_64 sh -
+    ```
+    
+- Istio 패키지 폴더로 이동
+    
+    ```java
+    cd istio-$ISTIO_VERSION
+    ```
+    
+- istioctl 클라이언트를 PATH에 잡아준다.
+    
+    ```java
+    export PATH=$PWD/bin:$PATH
+    ```
+    
+- Istio 설치
+    
+    ```java
+    istioctl install --set profile=demo --set hub=gcr.io/istio-release
+    ```
+    
+- Istio add-on Dashboard 설치
+    
+    ```java
+    mv samples/addons/loki.yaml samples/addons/loki.yaml.old
+    curl -o samples/addons/loki.yaml https://raw.githubusercontent.com/msa-school/Lab-required-Materials/main/Ops/loki.yaml
+    kubectl apply -f samples/addons
+    ```
+    
+- 모니터링 툴 설정
+    
+    ```java
+    kubectl patch svc kiali -n istio-system -p '{"spec": {"type": "LoadBalancer"}}'
+    
+    kubectl patch svc tracing -n istio-system -p '{"spec": {"type": "LoadBalancer"}}'
+    ```
+    
+- 서비스 메시 및 추적 서비스 확인
+  ```java
+  kubectl get service -n istio-system
+  ```
+
+  - Kiali 접속 확인
+  ![image](https://github.com/GyeoungJun/travel/assets/110224872/6386e837-9d4a-433d-ab73-ac5133f1d8f2)
+
+  - JAEGER UI 접속 확인
+  ![image](https://github.com/GyeoungJun/travel/assets/110224872/a1b8a24d-33f9-471e-8bf1-a0e329f81b13)
+
+### 통합 모니터링 - Loggregation / Monitoring
+
+- Loggregation
+  - oggregation
+    - 네임스페이스 생성, elasticsearch 설치
+    
+    ```jsx
+    kubectl create namespace logging
+    helm install elastic elastic/elasticsearch -f es-value.yml -n logging
+    ```
+    
+    - ID / PW 정리
+    
+    ```jsx
+    id : elastic
+    passwd : BZ0EbOrSkXuK29x7
+    
+    kubectl get secrets --namespace=logging elasticsearch-master-credentials -ojsonpath='{.data.password}' | base64 -d
+    ```
+    
+    - Fluent Bit 설치
+    
+    ```jsx
+    git clone https://github.com/acmexii/fluent-bit-kubernetes-logging.git
+    cd fluent-bit-kubernetes-logging/
+    ```
+    
+    - Fluent DaemonSet이 사용할 계정과 권한 설정
+    
+    ```jsx
+    kubectl create -f fluent-bit-service-account.yaml -n logging
+    kubectl create -f fluent-bit-role.yaml -n logging
+    kubectl create -f fluent-bit-role-binding.yaml -n logging
+    ```
+    
+    - Fluent  DaemonSet의 환경설정을 확인하고 데몬셋 차레로 설치
+    
+    ```jsx
+    kubectl apply -f fluent-bit-configmap-modified.yaml -n logging
+    kubectl apply -f fluent-bit-ds-modified.yaml -n logging
+    ```
+    
+    - Kibana 설치
+    
+    ```jsx
+    helm show values elastic/kibana > kibana-value.yml
+    
+    helm install kibana elastic/kibana -f kibana-value.yml -n logging
+    ```
+    
+    - Elasticserach 동작 확인
+      ![image](https://github.com/GyeoungJun/travel/assets/110224872/fe463bd9-6526-4bdf-bb05-bbcff2f71fa4)
+
+    - Kibana External-IP 확인
+      ```java
+      kubectl get svc -n logging
+      ```
+      ![image](https://github.com/GyeoungJun/travel/assets/110224872/0b3d8b74-60ee-4da0-8211-0d8f3b7b59e2)
+
+    - Kibana Web Admin 접속
+      ![image](https://github.com/GyeoungJun/travel/assets/110224872/0dd773ba-054a-46d6-b1cb-6d31917f7765)
+      ![image](https://github.com/GyeoungJun/travel/assets/110224872/b9fc4869-e0d9-4c6c-8e21-2a658a9364d6)
+    - 특정 네임스페이스 에서 로그 확인(예시 네임스페이스 : logging)
+      ![image](https://github.com/GyeoungJun/travel/assets/110224872/ca50d855-6a3d-4b4a-bbb5-93a0e123c7d5)
+
+
 
