@@ -12,11 +12,12 @@
 ### 분산 트랜잭션 - Saga
 
 ### 보상처리 - Compensation
+- Increase Flight Seats 로직 구현
+  
+- Decrease Flight Seats 로직 구현
 
 ### 단일 진입점 - Gateway
 - Gateway를 사용하여 마이크로 서비스들의 엔드포인트 단일화
-
-- ateway 를 사용하여 마이크로 서비스들의 엔드포인트 단일화
 
 ```java
 server:
