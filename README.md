@@ -567,5 +567,19 @@ spring:
     - 특정 네임스페이스 에서 로그 확인(예시 네임스페이스 : logging)
       ![image](https://github.com/GyeoungJun/travel/assets/110224872/ca50d855-6a3d-4b4a-bbb5-93a0e123c7d5)
 
+- Monitoring(Grafana)
+  - - Grafana 서비스 Open
+    
+    ```jsx
+    kubectl patch service/grafana -n istio-system -p '{"spec": {"type": "LoadBalancer"}}'
+    ```
+    
+  - Grafana WebUI 접속
+    ![image](https://github.com/GyeoungJun/travel/assets/110224872/dfa19a6f-0b62-4bb1-9cc6-c22a485f3320)
+    ![image](https://github.com/GyeoungJun/travel/assets/110224872/5d952ed0-4d1f-4170-a512-c7e9d1312f38)
+
+  - Grafana Dashboard를 통하여 노드별 Network IO, CPU, Memory 사용량 확인
+    ![image](https://github.com/GyeoungJun/travel/assets/110224872/30e92f7a-1df6-4625-9eb8-844725eaa5a2)
+
 
 
